@@ -45,12 +45,22 @@ public class SpellingBee {
     //  that will find the substrings recursively.
     public void generate() {
         // YOUR CODE HERE — Call your recursive method!
+        for (String s : letters) {
+            makeWords(s, letters);
+        }
     }
 
     // TODO: Apply mergesort to sort all words. Do this by calling ANOTHER method
     //  that will find the substrings recursively.
     public void sort() {
         // YOUR CODE HERE
+        String[] words1 = new String[words.size()];
+        int i = 0;
+        for (String word : words) {
+            words1[i] = word;
+            i++;
+        }
+        mergeSort(words1, 0, words.size() - 1);
     }
 
     // Removes duplicates from the sorted list.
@@ -69,6 +79,11 @@ public class SpellingBee {
     //  If it is not in the dictionary, remove it from words.
     public void checkWords() {
         // YOUR CODE HERE
+        for (String word : words) {
+            if(!binary(word, 0, DICTIONARY_SIZE)) {
+                words.remove(words.indexOf(word));
+            }
+        }
     }
 
     // Prints all valid words to wordList.txt
@@ -135,5 +150,65 @@ public class SpellingBee {
             System.out.println("Could not write to output file.");
         }
         s.close();
+    }
+
+    public void makeWords(String word1, String word2) {
+        if (word1.equals("")) {
+            words.add(word1);
+            return;
+        }
+        if (word2.equals("")) {
+            words.add(word2);
+            return;
+        }
+
+
+    }
+
+    public String[] mergeSort(String[] arr, int low, int high) {
+        if (high - low == 0) {
+            String[] newArr = new String[1];
+            newArr[0] = arr[low];
+            return newArr;
+        }
+        int med = (high + low) / 2;
+        String[] arr1 = mergeSort(arr, low, med);
+        String[] arr2 = mergeSort(arr, med + 1, high);
+        return merge(arr1, arr2);
+    }
+
+    public String[] merge(String[] arr1, String[] arr2) {
+        String[] merged = new String[arr1.length + arr2.length];
+        int i = 0, j = 0;
+        while (i < arr1.length && j < arr2.length) {
+            if (arr1[i].compareTo(arr2[j]) < 0) {
+                merged[i + j] = arr1[i];
+                i++;
+            }
+            else {
+                merged[i + j] = arr2[j];
+                j++;
+            }
+        }
+        while (i < arr1.length) {
+            merged[i + j] = arr1[i];
+            i++;
+        }
+        while (j < arr2.length) {
+            merged[i + j] = arr2[j];
+            j++;
+        }
+        return merged;
+    }
+
+    public boolean binary(String word, int low, int high) {
+        if (high - low == 0) {
+            if (DICTIONARY[low] == word) {
+                return true;
+            }
+            return false;
+        }
+        int med = (high + low) / 2;
+        return binary(word, low, med) || binary(word, med + 1, high);
     }
 }
