@@ -22,7 +22,7 @@ import java.util.Scanner;
  * It utilizes recursion to generate the strings, mergesort to sort them, and
  * binary search to find them in a dictionary.
  *
- * @author Zach Blick, [ADD YOUR NAME HERE]
+ * @author Zach Blick, Parker Brown
  *
  * Written on March 5, 2023 for CS2 @ Menlo School
  *
@@ -45,9 +45,8 @@ public class SpellingBee {
     //  that will find the substrings recursively.
     public void generate() {
         // YOUR CODE HERE — Call your recursive method!
-        for (String s : letters) {
-            makeWords(s, letters);
-        }
+        makeWords("", letters);
+
     }
 
     // TODO: Apply mergesort to sort all words. Do this by calling ANOTHER method
@@ -56,11 +55,19 @@ public class SpellingBee {
         // YOUR CODE HERE
         String[] words1 = new String[words.size()];
         int i = 0;
+        // Iterates through words arrayList to create copy
         for (String word : words) {
             words1[i] = word;
             i++;
         }
-        mergeSort(words1, 0, words.size() - 1);
+        // Calls merge algorithm to create sorted array
+        String[] merged = mergeSort(words1, 0, words.size() - 1);
+        // Empties words arrayList
+        words.clear();
+        // Fills words ArrayList with sorted array
+        for (String word : merged) {
+            words.add(word);
+        }
     }
 
     // Removes duplicates from the sorted list.
@@ -79,10 +86,17 @@ public class SpellingBee {
     //  If it is not in the dictionary, remove it from words.
     public void checkWords() {
         // YOUR CODE HERE
-        for (String word : words) {
-            if(!binary(word, 0, DICTIONARY_SIZE)) {
-                words.remove(words.indexOf(word));
+        int i = 0;
+        // Iterates through each word
+        while (i < words.size()) {
+            String word = words.get(i);
+            // Checks to see if word is in DICTIONARY using binary search
+            if(!binary(word, 0, DICTIONARY_SIZE - 1)) {
+                // Removes word from array if not found
+                words.remove(i);
+                i--;
             }
+            i++;
         }
     }
 
@@ -151,36 +165,41 @@ public class SpellingBee {
         }
         s.close();
     }
-
-    public void makeWords(String word1, String word2) {
-        if (word1.equals("")) {
-            words.add(word1);
+    // generates words with given letters
+    public void makeWords(String product, String lettersLeft) {
+        // Adds product to list of words
+        words.add(product);
+        // Base case: if there are no more letters
+        if (lettersLeft.equals("")) {
             return;
         }
-        if (word2.equals("")) {
-            words.add(word2);
-            return;
+        // For every letter, recall make words
+        for (int i = 0; i < lettersLeft.length(); i++) {
+            makeWords(product + lettersLeft.charAt(i), lettersLeft.substring(0, i) + lettersLeft.substring(i + 1));
         }
-
-
     }
-
+    // sorts words using mergesort
     public String[] mergeSort(String[] arr, int low, int high) {
+        // Base case: if high and low are the same
         if (high - low == 0) {
             String[] newArr = new String[1];
             newArr[0] = arr[low];
             return newArr;
         }
         int med = (high + low) / 2;
+        // Recursive step: recall merge sort on two smaller arrays
         String[] arr1 = mergeSort(arr, low, med);
         String[] arr2 = mergeSort(arr, med + 1, high);
         return merge(arr1, arr2);
     }
-
+    // continues the implementation of merge sort
     public String[] merge(String[] arr1, String[] arr2) {
+        // merged contains final sorted array
         String[] merged = new String[arr1.length + arr2.length];
         int i = 0, j = 0;
+        // while there are still contents in both arrays
         while (i < arr1.length && j < arr2.length) {
+            // uses compareTo to determine alphabetical order
             if (arr1[i].compareTo(arr2[j]) < 0) {
                 merged[i + j] = arr1[i];
                 i++;
@@ -190,6 +209,7 @@ public class SpellingBee {
                 j++;
             }
         }
+        // If there are still words left in one of the arrays, they are added
         while (i < arr1.length) {
             merged[i + j] = arr1[i];
             i++;
@@ -200,15 +220,19 @@ public class SpellingBee {
         }
         return merged;
     }
-
+    // implementation of binary sort to search for word in dictionary
     public boolean binary(String word, int low, int high) {
-        if (high - low == 0) {
-            if (DICTIONARY[low] == word) {
+        // Base case: high and low refer to same
+        if (high - low <= 0) {
+            // if given word is in dictionary return true
+            if (DICTIONARY[low].equals(word)) {
                 return true;
             }
             return false;
         }
+        // cuts problem in half by subtracting side that word is known to not be on
         int med = (high + low) / 2;
-        return binary(word, low, med) || binary(word, med + 1, high);
+        // Recursive step: looks for word on either side
+        return binary(word, low, med - 1) || binary(word, med + 1, high);
     }
 }
